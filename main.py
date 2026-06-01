@@ -122,7 +122,7 @@ def controls(key, down : bool = False):
 
 def transform(p : Vec2):
     global window, drawing_zoom, drawing_pos
-    return (p - drawing_pos) / drawing_zoom * Config().input_scale
+    return (p * Config().input_scale - drawing_pos) / drawing_zoom
 
 while True:
     if not hover and tp.just_pressed:
