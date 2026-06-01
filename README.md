@@ -20,5 +20,10 @@ Very useful to sketch easily by only drawing with your touchpad.
 - Python 3.13+ required
 - `pip install evdev`
 - Find touchpad's `/dev/input/eventX` by running `cat /proc/bus/input/devices`
-- Edit `config.json` and put replace `/dev/input/event9` with what you got
+- Edit `config.json` and put replace `/dev/input/eventX` with what you got
 - Run using `sudo python3 main.py`
+
+## Important notice
+There are times where after restarting your computer, the event used by your
+touchpad changes. **Please check every first time you use the program if the**
+**event has changed since last session.**
