@@ -12,6 +12,7 @@ Very useful to sketch easily by only drawing with your touchpad.
 - Increase / decrease brush size with **&uarr;** and **&darr;**
 - Save with **S** by entering the filename (with extension) and pressing **Enter** or **Escape** to cancel
 - Unlock mouse with **G**
+- Adjust the touchpad scale with **A**
 - Quit with **Escape**
 <br></br>
 

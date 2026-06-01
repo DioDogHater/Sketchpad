@@ -32,6 +32,7 @@ class Config:
         with open(Config.__path, "r") as f:
             self.__data : dict = json.load(f)
         self.__touchpad : str = self.__get_entry("touchpad", str)
+        self.__input_scale : Vec2 = Vec2(self.__get_entry("x_scale", (int, float), 1.0), self.__get_entry("y_scale", (int, float), 1.0))
         self.__canvas_size : Vec2 = Vec2(self.__get_entry("canvas_width", int, 1100), self.__get_entry("canvas_height", int, 700))
         self.__window_size : Vec2 = Vec2(self.__get_entry("window_width", int, 1100), self.__get_entry("window_height", int, 700))
         if self.__canvas_size.x <= 0 or self.__canvas_size.y <= 0:
@@ -64,6 +65,20 @@ class Config:
         if not isinstance(value, str):
             raise TypeError(f"value must be of type str, got {type(value)} instead.")
         self.__data["touchpad"] = self.__touchpad = value
+        self.__write()
+
+    @property
+    def input_scale(self) -> Vec2:
+        return self.__input_scale
+
+    @input_scale.setter
+    def input_scale(self, value : Vec2):
+        if not isinstance(value, Vec2):
+            raise TypeError(f"value must be of type str, got {type(value)} instead.")
+        self.__input_scale = value
+        self.__data["x_scale"] = value.x
+        self.__data["y_scale"] = value.y
+        self.__write()
 
     @property
     def canvas_size(self) -> Vec2:
@@ -73,10 +88,11 @@ class Config:
     @canvas_size.setter
     def canvas_size(self, value : Vec2):
         if not isinstance(value, Vec2):
-            raise TypeError()
+            raise TypeError(f"value must be of type Vec2, got {type(value)} instead.")
         self.__canvas_size = value
         self.__data["canvas_width"] = value.x
         self.__data["canvas_height"] = value.y
+        self.__write()
 
     @property
     def window_size(self) -> Vec2:
@@ -86,11 +102,21 @@ class Config:
     @window_size.setter
     def window_size(self, value : Vec2):
         if not isinstance(value, Vec2):
-            raise TypeError()
+            raise TypeError(f"value must be of type Vec2, got {type(value)} instead.")
         self.__window_size = value
         self.__data["window_width"] = value.x
         self.__data["window_height"] = value.y
+        self.__write()
 
     @property
     def save_dir(self) -> str:
+        """Save directory for images."""
         return self.__save_dir
+
+    @save_dir.setter
+    def save_dir(self, value : str):
+        if not isinstance(value, str):
+            raise TypeError(f"value must be of type str, got {type(value)} instead.")
+        self.__save_dir = value
+        self.__data["save_dir"] = value
+        self.__write()

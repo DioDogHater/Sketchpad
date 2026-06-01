@@ -19,6 +19,8 @@ window = Config().window_size
 win = pg.display.set_mode((window.x, window.y))
 pg.display.set_caption("Sketchpad with touchpad")
 
+font : pg.font.Font = pg.font.SysFont("monospace", 20)
+
 tp : Touchpad = Touchpad()
 
 drawing : pg.Surface = pg.surface.Surface((canvas.x, canvas.y))
@@ -30,6 +32,11 @@ last_point : Vec2 | None = None
 ignore : bool = False
 moving : bool = False
 hover : bool = True
+
+# Extra modes
+adjusting : bool = False
+editing_text : bool = False
+input_text : str = ""
 
 brushes : list[Brush] = [PaintBrush(), Eraser()]
 width_vel : float = 1.0
@@ -57,8 +64,6 @@ def reset_brush():
     tp.just_pressed = False
     ignore = False
 
-editing_text : bool = False
-input_text : str = ""
 def input_field(event):
     global input_text, editing_text, drawing
     if event.type == pg.TEXTINPUT:
@@ -75,7 +80,7 @@ def input_field(event):
             pg.key.stop_text_input()
 
 def controls(key, down : bool = False):
-    global tp, ignore, hover, moving, brushes, curr_brush, drawing, undo_buffer, redo_buffer, width_vel, drawing_zoom, editing_text, input_text
+    global tp, ignore, hover, moving, brushes, curr_brush, drawing, undo_buffer, redo_buffer, width_vel, drawing_zoom, editing_text, input_text, adjusting
     if key == pg.K_ESCAPE and down:
         pg.quit()
         exit()
@@ -108,14 +113,16 @@ def controls(key, down : bool = False):
         drawing_zoom = min(1.05 * drawing_zoom, 2.0)
     elif key == pg.K_MINUS or key == pg.K_UNDERSCORE and down:
         drawing_zoom = max(0.95 * drawing_zoom, 0.25)
-    elif key == pg.K_s and down:
+    elif key == pg.K_s and down and adjust_step == 0:
         input_text = ""
         editing_text = True
         pg.key.start_text_input()
+    elif key == pg.K_a and down:
+        adjusting = True
 
 def transform(p : Vec2):
     global window, drawing_zoom, drawing_pos
-    return (p - drawing_pos) / drawing_zoom
+    return (p - drawing_pos) / drawing_zoom * Config().input_scale
 
 while True:
     if not hover and tp.just_pressed:
@@ -140,10 +147,14 @@ while True:
         if event.type == pg.QUIT:
             pg.quit()
             exit()
-        if not editing_text and (event.type == pg.KEYDOWN or event.type == pg.KEYUP):
+        if not editing_text and not adjusting and (event.type == pg.KEYDOWN or event.type == pg.KEYUP):
             controls(event.key, event.type == pg.KEYDOWN)
         elif editing_text and (event.type == pg.TEXTINPUT or event.type == pg.KEYDOWN):
             input_field(event)
+        elif adjusting and (event.type == pg.KEYDOWN):
+            if event.key == pg.K_RETURN and last_point != None:
+                Config().input_scale = window / last_point
+                adjusting = False
 
     if tp.keys["BTN_TOOL_DOUBLETAP"] and hover:
         moving = not moving
@@ -158,10 +169,16 @@ while True:
     pg.draw.rect(win, Color(125,125,255), drawing_rect, width=1)
 
     if last_point:
-        brushes[curr_brush].display(win, last_point, drawing_zoom)
+        brushes[curr_brush].display(win, last_point * Config().input_scale, drawing_zoom)
+
+    if adjusting:
+        text : pg.Surface = font.render(
+            "Touch bottom right corner of touchpad, then press ENTER",
+            True, Color(255, 0, 0)
+        )
+        win.blit(text, (window.x / 2 - text.get_width() / 2, window.y / 2 - 12))
 
     if editing_text:
-        font : pg.font.Font = pg.font.SysFont("monospace", 20)
         text : pg.Surface = font.render(input_text, True, Color(100, 0, 200))
         pg.draw.rect(win, Color(150, 150, 150), (window.x / 3, window.y / 2 - 12, window.x / 3, 24))
         pg.draw.rect(win, Color(200, 0, 0), (window.x / 3, window.y / 2 - 12, window.x / 3, 24), width=4)
