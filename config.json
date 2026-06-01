@@ -1,0 +1,8 @@
+{
+    "touchpad" : "/dev/input/event8",
+    "canvas_width" : 2048,
+    "canvas_height": 1024,
+    "window_width" : 1235,
+    "window_height": 750,
+    "save_directory": "saves/"
+}
